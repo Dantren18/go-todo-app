@@ -1,0 +1,106 @@
+package main
+
+import (
+	"GoCourse/store"
+	"context"
+	"flag"
+	"fmt"
+	"log/slog"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+)
+
+func main() {
+	//generate a unique trace ID (basic version: timestamp-based)
+	traceID := fmt.Sprintf("%d", time.Now())
+	ctx := context.WithValue(context.Background(), "traceID", traceID)
+
+	//declaring a pointer to a string for adding/updating tasks
+	var taskPtr *string
+	taskPtr = flag.String("task", "", "The task you want to add or use for updating")
+
+	//declaring a pointer to an int for updating a task
+	var updateIndexPtr *int
+	updateIndexPtr = flag.Int("update", 0, "The task number to update")
+
+	//declaring a pointer to an int for deleting a task
+	var deleteIndexPtr *int
+	deleteIndexPtr = flag.Int("delete", 0, "The task number to delete")
+
+	//parse the flags
+	flag.Parse()
+
+	fmt.Println("Update index:", *updateIndexPtr)
+	fmt.Println("Delete index:", *deleteIndexPtr)
+
+	//load tasks from the file using store package
+	tasks, err := store.LoadTasks("tasks.txt")
+
+	//handle any error returned from loading
+	if err != nil {
+		slog.ErrorContext(ctx, "LoadTasks failed", "err", err)
+		return
+	}
+
+	//update task if -update flag was used
+	if *updateIndexPtr > 0 {
+		if *taskPtr == "" {
+			fmt.Println("Please provide a task with -task to update an item.")
+			return
+		}
+		tasks, err = store.UpdateTask(tasks, *updateIndexPtr-1, *taskPtr)
+		if err != nil {
+			slog.ErrorContext(ctx, "UpdateTask failed", "err", err)
+			fmt.Println("Error:", err)
+			return
+		}
+		fmt.Printf("Updated task #%d\n", *updateIndexPtr)
+
+		//delete task if -delete flag was used
+	} else if *deleteIndexPtr > 0 {
+		tasks, err = store.DeleteTask(tasks, *deleteIndexPtr-1)
+		if err != nil {
+			slog.ErrorContext(ctx, "DeleteTask failed", "err", err)
+			fmt.Println("Error:", err)
+			return
+		}
+		fmt.Printf("Deleted task #%d\n", *deleteIndexPtr)
+
+		//otherwise just add a new task
+	} else {
+		if *taskPtr == "" {
+			fmt.Println("Please provide a task using -task flag.")
+			return
+		}
+		tasks = append(tasks, *taskPtr)
+		fmt.Println("Added new task.")
+	}
+
+	//print the full contents of the slice
+	fmt.Println("Your To-Do List:")
+	for i := 0; i < len(tasks); i++ {
+		fmt.Printf("%d. %s\n", i+1, tasks[i])
+	}
+
+	//save updated tasks back to file using store package
+	err = store.SaveTasks("tasks.txt", tasks)
+
+	//error handling if save fails
+	if err != nil {
+		slog.ErrorContext(ctx, "SaveTasks failed", "err", err)
+	} else {
+		slog.InfoContext(ctx, "Tasks saved to disk", "count", len(tasks))
+	}
+
+	//wait for interrupt signal (Ctrl+C) before exiting
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	fmt.Println("🔄 Application is running. Press Ctrl+C to exit...")
+
+	<-stop // this line blocks until a signal is received
+
+	slog.InfoContext(ctx, "Received shutdown signal, exiting...")
+}
