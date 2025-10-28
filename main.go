@@ -13,32 +13,27 @@ import (
 )
 
 func main() {
-	//generate a unique trace ID (basic version: timestamp-based)
+	//generate a unique trace ID using current timestamp
 	traceID := fmt.Sprintf("%d", time.Now())
 	ctx := context.WithValue(context.Background(), "traceID", traceID)
 
-	//declaring a pointer to a string for adding/updating tasks
+	//declaring pointers/variables/flags
 	var taskPtr *string
 	taskPtr = flag.String("task", "", "The task you want to add or use for updating")
 
-	//declaring a pointer to an int for updating a task
 	var updateIndexPtr *int
 	updateIndexPtr = flag.Int("update", 0, "The task number to update")
 
-	//declaring a pointer to an int for deleting a task
 	var deleteIndexPtr *int
 	deleteIndexPtr = flag.Int("delete", 0, "The task number to delete")
 
-	//parse the flags
 	flag.Parse()
 
 	fmt.Println("Update index:", *updateIndexPtr)
 	fmt.Println("Delete index:", *deleteIndexPtr)
 
-	//load tasks from the file using store package
 	tasks, err := store.LoadTasks("tasks.txt")
 
-	//handle any error returned from loading
 	if err != nil {
 		slog.ErrorContext(ctx, "LoadTasks failed", "err", err)
 		return
@@ -94,13 +89,12 @@ func main() {
 		slog.InfoContext(ctx, "Tasks saved to disk", "count", len(tasks))
 	}
 
-	//wait for interrupt signal (Ctrl+C) before exiting
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 
-	fmt.Println("🔄 Application is running. Press Ctrl+C to exit...")
+	fmt.Println("Press Ctrl+C to stop running the todo list")
 
-	<-stop // this line blocks until a signal is received
+	<-stop
 
 	slog.InfoContext(ctx, "Received shutdown signal, exiting...")
 }
