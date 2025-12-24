@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>To-Do List</title>
+</head>
+<body>
+  <h1>All Tasks</h1>
+
+
+
+  <hr>
+
+  <!-- show all tasks -->
+  <ul>
+    {{range .}}
+      <li><strong>{{.Description}}</strong> - {{.Status}}</li>
+    {{end}}
+  </ul>
+
+  <script>
+    document.getElementById("taskForm").addEventListener("submit", function(e) {
+      e.preventDefault(); // stop page from refreshing
+
+      const desc = document.getElementById("desc").value;
+      const status = document.getElementById("status").value;
+
+      fetch("/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description: desc, status: status })
+      })
+      .then(response => {
+        if (response.ok) {
+          location.reload(); // reload page to show new task
+        } else {
+          alert("Failed to create task");
+        }
+      });
+    });
+  </script>
+
+    <!-- form to add new task -->
+  <h2>Add New Task</h2>
+  <form id="taskForm">
+    <label>Description:</label>
+    <input type="text" id="desc" required>
+    
+    <label>Status:</label>
+    <select id="status">
+      <option value="Not Started">Not Started</option>
+      <option value="In Progress">In Progress</option>
+      <option value="Completed">Completed</option>
+    </select>
+
+    <button type="submit">Add Task</button>
+  </form>
+  <!-- button to go to the about page -->
+  <button onclick="location.href='/about/about.html'">About This App</button>
+</body>
+</html>
