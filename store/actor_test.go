@@ -2,6 +2,8 @@
 package store
 
 import (
+	"os"
+	"strconv"
 	"sync"
 	"testing"
 )
@@ -21,7 +23,7 @@ func TestConcurrentTaskCreation(t *testing.T) {
 			SendCommand(TaskCommand{
 				Type: CreateTask,
 				NewTask: TodoItem{
-					Description: "Task #" + string(rune(i)),
+					Description: "Task #" + strconv.Itoa(i),
 					Status:      "Not Started",
 				},
 			})
@@ -34,7 +36,9 @@ func TestConcurrentTaskCreation(t *testing.T) {
 		Type: GetAllTasks, // ask the actor to return all tasks
 	})
 
-	if len(tasks) < total {
-		t.Errorf("expected at least %d tasks, got %d", total, len(tasks)) // check if all tasks were created
+	if len(tasks) != total {
+		t.Errorf("expected %d tasks, got %d", total, len(tasks)) // check if all tasks were created
 	}
+
+	defer os.Remove("tasks.json")
 }
