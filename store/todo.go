@@ -52,7 +52,10 @@ func UpdateTaskStatus(items []TodoItem, index int, newStatus string) ([]TodoItem
 	if index < 0 || index >= len(items) {
 		return items, errors.New("status update index out of range")
 	}
-	// ************ADD CHECK THAT NEW STATUS IS ONE OF THE FOLLOWING: "Not started", "Started", "Completed"********************
+	// require exact match of allowed statuses
+	if newStatus != "Not started" && newStatus != "Started" && newStatus != "Completed" {
+		return items, errors.New("Status must be either \"Not started\", \"Started\", or \"Completed\"")
+	}
 	items[index].Status = newStatus
 	return items, nil
 }

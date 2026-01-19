@@ -2,19 +2,18 @@
 
 This project is a beginner-friendly **To-Do List** app written in Go. It allows users to:
 
-✅ Add tasks  
-📋 View tasks  
-✏️ Update task description or status  
-❌ Delete tasks  
+- Add tasks  
+- View tasks  
+- Update task description or status  
+- Delete tasks  
 
 Tasks are stored in a local `tasks.json` file. The app supports both:
 
 - A **Command-Line Interface (CLI)**
 - A **REST API (HTTP server)**
 
----
 
-## 📁 Task Format
+## Task Format
 
 Each task includes:
 
@@ -24,25 +23,29 @@ Each task includes:
   - `"Started"`
   - `"Completed"`
 
----
+  NOTE: the task MUST have one of these 3 statuses or you will receive an error.
 
-## ▶️ Run the App
+## How to use app
+To use this app, first you will need to clone the repo. You can do this using the following command:
 
-Start the HTTP server on `http://localhost:8080`:
+```
+git clone https://github.com/Dantren18/go-todo-app.git
+```
 
-```bash
+Then whilst in the repo, from the main directory you can run the following command to start running the server:
+```
 go run main.go
-
 ```
 
 
-# 🌐 Using the API (All Commands with `curl`)
 
-Below are all available API endpoints with example commands you can run from **Git Bash**, **WSL**, or **macOS/Linux terminal**.
 
----
+# Using the API through command line with curl
 
-### ✅ CREATE a New Task  
+Below are all available API endpoints with example commands you can run from the command line:
+
+
+### CREATE a New Task  
 **POST /create**  
 Adds a new task with a description and status:
 
@@ -54,7 +57,7 @@ curl -X POST http://localhost:8080/create \
 
 ---
 
-### 📋 GET All Tasks  
+### GET All Tasks  
 **GET /get**  
 Returns all tasks stored in `tasks.json`:
 
@@ -81,7 +84,7 @@ Example response:
 
 ---
 
-### ✏️ UPDATE a Task  
+### UPDATE a Task  
 **POST /update**  
 You can update **description**, **status**, or **both**. Task index starts at **0**.
 
@@ -108,7 +111,7 @@ curl -X POST http://localhost:8080/update \
 
 ---
 
-### ❌ DELETE a Task  
+### DELETE a Task  
 **POST /delete**  
 Deletes task at the provided index:
 
@@ -122,7 +125,7 @@ Expected result: HTTP 204 No Content (task deleted)
 
 ---
 
-### 📌 Notes
+### Notes
 
 - Task indexes start from **0**
 - Valid statuses are:
@@ -134,10 +137,10 @@ Expected result: HTTP 204 No Content (task deleted)
 
 ---
 
-### 🧪 Running Unit Tests
+### Running Unit Tests
 
-Use this command to run all your Go tests in the `store` package:
+Use this command to run all tests that have been written in this project:
 
 ```bash
-go test ./store
+go test ./...
 ```

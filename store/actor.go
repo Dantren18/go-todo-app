@@ -47,28 +47,53 @@ func StartStoreActor() {
 				cmd.ResponseCh <- tasks
 
 			case CreateTask:
-				tasks = append(tasks, cmd.NewTask)
-				SaveTasks("tasks.json", tasks)
-				fmt.Println("Create task, lists of tasks:", tasks)
-
-				cmd.ResponseCh <- tasks
+				// validate status for new tasks - if invalid, respond with current list and do not save
+				if cmd.NewTask.Status != "Not Started" && cmd.NewTask.Status != "Started" && cmd.NewTask.Status != "Completed" {
+					fmt.Println("Failed to create task: invalid status", cmd.NewTask.Status)
+					cmd.ResponseCh <- tasks
+				} else {
+					tasks = append(tasks, cmd.NewTask)
+					SaveTasks("tasks.json", tasks)
+					fmt.Println("Create task, lists of tasks:", tasks)
+					cmd.ResponseCh <- tasks
+				}
 
 			case UpdateTask:
 				if cmd.Index >= 0 && cmd.Index < len(tasks) {
+					var err error
 					if cmd.Desc != "" {
-						tasks[cmd.Index].Description = cmd.Desc
+						updated, e := UpdateTaskDescription(tasks, cmd.Index, cmd.Desc)
+						if e != nil {
+							fmt.Println("Failed to update description:", e)
+						} else {
+							tasks = updated
+							err = e
+						}
 					}
 					if cmd.Status != "" {
-						tasks[cmd.Index].Status = cmd.Status
+						updated, e := UpdateTaskStatus(tasks, cmd.Index, cmd.Status)
+						if e != nil {
+							fmt.Println("Failed to update status:", e)
+						} else {
+							tasks = updated
+							err = e
+						}
 					}
-					SaveTasks("tasks.json", tasks)
+					if err == nil {
+						SaveTasks("tasks.json", tasks)
+					}
 				}
 				cmd.ResponseCh <- tasks
 
 			case DeleteaTask:
 				if cmd.Index >= 0 && cmd.Index < len(tasks) {
-					tasks = append(tasks[:cmd.Index], tasks[cmd.Index+1:]...)
-					SaveTasks("tasks.json", tasks)
+					updated, e := DeleteTask(tasks, cmd.Index)
+					if e != nil {
+						fmt.Println("Failed to delete task:", e)
+					} else {
+						tasks = updated
+						SaveTasks("tasks.json", tasks)
+					}
 				}
 				cmd.ResponseCh <- tasks
 			}
@@ -79,9 +104,8 @@ func StartStoreActor() {
 
 // this function is used to send a request to actor
 func SendCommand(cmd TaskCommand) []TodoItem {
-	// make a new channel where the actor will send the result
+	// make a new channel where the actor will send the result  send the command to the actor
 	cmd.ResponseCh = make(chan []TodoItem)
-	// send the command to the actor
 	commandCh <- cmd
 
 	return <-cmd.ResponseCh
