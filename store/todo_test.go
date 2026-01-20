@@ -23,6 +23,7 @@ func TestLoadTasks_JSON(t *testing.T) {
 	if len(items) != 2 {
 		t.Errorf("Expected 2 items, got %d", len(items))
 	}
+	// Using %+v to print the entire struct for better error messages
 	if items[0].Description != "Task A" || items[0].Status != "Not started" {
 		t.Errorf("First item incorrect: got %+v", items[0])
 	}

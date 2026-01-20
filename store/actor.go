@@ -54,7 +54,7 @@ func StartStoreActor() {
 				} else {
 					tasks = append(tasks, cmd.NewTask)
 					SaveTasks("tasks.json", tasks)
-					fmt.Println("Create task, lists of tasks:", tasks)
+					fmt.Println("Created new task, lists of tasks:", tasks)
 					cmd.ResponseCh <- tasks
 				}
 

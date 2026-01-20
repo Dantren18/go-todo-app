@@ -4,10 +4,14 @@ import (
 	"GoCourse/api"
 	"GoCourse/logger"
 	"GoCourse/store"
+	"context"
 	"html/template"
-	"log"
 	"log/slog"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func main() {
@@ -37,7 +41,41 @@ func main() {
 	// Wrap mux with TraceID middleware
 	handler := logger.TraceIDMiddleware(mux)
 
-	// Log and start server on port 8080
-	slog.Info("Starting server on :8080")
-	log.Fatal(http.ListenAndServe(":8080", handler))
+	// Create an http.Server so we can shut it down cleanly later
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: handler,
+	}
+
+	// Run the server in a goroutine. ListenAndServe blocks, so running it
+	// here lets the main goroutine wait for OS signals below.
+	go func() {
+		slog.Info("Starting server on :8080")
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			// Only log unexpected errors (ErrServerClosed is returned by Shutdown)
+			slog.Error("server error", "err", err)
+		}
+	}()
+
+	// Set up channel on which to receive OS signals. We use a small buffer
+	// so the signal isn't missed if nobody is ready to receive immediately.
+	quit := make(chan os.Signal, 1)
+	// Notify the channel when an interrupt (Ctrl+C) or SIGTERM is received.
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	// Block here until we receive a signal.
+	<-quit
+
+	slog.Info("Shutdown signal received, shutting down server...")
+
+	// Create a context with timeout for the graceful shutdown. This gives
+	// inflight requests up to 5 seconds to finish before we exit.
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		slog.Error("server forced to shutdown", "err", err)
+	} else {
+		slog.Info("server stopped gracefully")
+	}
 }
