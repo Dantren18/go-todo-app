@@ -24,8 +24,8 @@ func TestConcurrentTaskCreation(t *testing.T) {
 			SendCommand(TaskCommand{
 				Type: CreateTask,
 				NewTask: TodoItem{
-					Description: "Task #" + strconv.Itoa(i),
-					Status:      "Not Started",
+					Desc:   "Task #" + strconv.Itoa(i),
+					Status: "Not Started",
 				},
 			})
 		}(i)
@@ -60,8 +60,8 @@ func TestConcurrentTaskCreationParallel(t *testing.T) {
 			SendCommand(TaskCommand{
 				Type: CreateTask,
 				NewTask: TodoItem{
-					Description: "Parallel task " + strconv.Itoa(taskNumber),
-					Status:      "Not Started",
+					Desc:   "Parallel task " + strconv.Itoa(taskNumber),
+					Status: "Not Started",
 				},
 			})
 		})
@@ -86,8 +86,8 @@ func TestConcurrentTaskUpdateParallel(t *testing.T) {
 		SendCommand(TaskCommand{
 			Type: CreateTask,
 			NewTask: TodoItem{
-				Description: "Task to update " + strconv.Itoa(i),
-				Status:      "Not Started",
+				Desc:   "Task to update " + strconv.Itoa(i),
+				Status: "Not Started",
 			},
 		})
 	}
@@ -160,8 +160,8 @@ func TestConcurrentTaskGetParallel(t *testing.T) {
 		SendCommand(TaskCommand{
 			Type: CreateTask,
 			NewTask: TodoItem{
-				Description: "Task number " + strconv.Itoa(i),
-				Status:      "Not Started",
+				Desc:   "Task number " + strconv.Itoa(i),
+				Status: "Not Started",
 			},
 		})
 	}

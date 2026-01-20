@@ -65,13 +65,6 @@ Returns all tasks stored in `tasks.json`:
 curl http://localhost:8080/get
 ```
 
-curl -X POST http://localhost:8080/update \
-  -H "Content-Type: application/json" \
-  -d '{"index": 0, "status": "In Progress"}'
-
-  curl -X POST http://localhost:8080/update \
-  -H "Content-Type: application/json" \
-  -d '{"index": 0, "status": "Completed"}'
 
 Example response:
 

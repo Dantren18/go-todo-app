@@ -24,10 +24,10 @@ func TestLoadTasks_JSON(t *testing.T) {
 		t.Errorf("Expected 2 items, got %d", len(items))
 	}
 	// Using %+v to print the entire struct for better error messages
-	if items[0].Description != "Task A" || items[0].Status != "Not started" {
+	if items[0].Desc != "Task A" || items[0].Status != "Not started" {
 		t.Errorf("First item incorrect: got %+v", items[0])
 	}
-	if items[1].Description != "Task B" || items[1].Status != "Started" {
+	if items[1].Desc != "Task B" || items[1].Status != "Started" {
 		t.Errorf("Second item incorrect: got %+v", items[1])
 	}
 }
@@ -38,8 +38,8 @@ func TestSaveTasks_JSON(t *testing.T) {
 	defer os.Remove(filename)
 
 	original := []TodoItem{
-		{Description: "Task X", Status: "Not started"},
-		{Description: "Task Y", Status: "Completed"},
+		{Desc: "Task X", Status: "Not started"},
+		{Desc: "Task Y", Status: "Completed"},
 	}
 	err := SaveTasks(filename, original)
 	if err != nil {
@@ -57,20 +57,20 @@ func TestSaveTasks_JSON(t *testing.T) {
 		t.Fatalf("Failed to decode JSON: %v", err)
 	}
 
-	if len(loaded) != 2 || loaded[1].Status != "Completed" || loaded[0].Description != "Task X" {
+	if len(loaded) != 2 || loaded[1].Status != "Completed" || loaded[0].Desc != "Task X" {
 		t.Errorf("Expected tasks to match original, got %+v", loaded)
 	}
 }
 
 // Test updating a task description
 func TestUpdateTaskDescription(t *testing.T) {
-	items := []TodoItem{{Description: "Old", Status: "Not started"}}
+	items := []TodoItem{{Desc: "Old", Status: "Not started"}}
 	updated, err := UpdateTaskDescription(items, 0, "New")
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
-	if updated[0].Description != "New" {
-		t.Errorf("Expected New, got %s", updated[0].Description)
+	if updated[0].Desc != "New" {
+		t.Errorf("Expected New, got %s", updated[0].Desc)
 	}
 
 	_, err = UpdateTaskDescription(items, 2, "Oops")
@@ -81,7 +81,7 @@ func TestUpdateTaskDescription(t *testing.T) {
 
 // Test updating a task status
 func TestUpdateTaskStatus(t *testing.T) {
-	items := []TodoItem{{Description: "Task Z", Status: "Not started"}}
+	items := []TodoItem{{Desc: "Task Z", Status: "Not started"}}
 	updated, err := UpdateTaskStatus(items, 0, "Completed")
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
@@ -99,16 +99,16 @@ func TestUpdateTaskStatus(t *testing.T) {
 // Test deleting a task
 func TestDeleteTask(t *testing.T) {
 	items := []TodoItem{
-		{Description: "A", Status: "Not started"},
-		{Description: "B", Status: "Started"},
-		{Description: "C", Status: "Completed"},
+		{Desc: "A", Status: "Not started"},
+		{Desc: "B", Status: "Started"},
+		{Desc: "C", Status: "Completed"},
 	}
 
 	updated, err := DeleteTask(items, 1)
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
-	if len(updated) != 2 || updated[0].Description != "A" || updated[1].Description != "C" {
+	if len(updated) != 2 || updated[0].Desc != "A" || updated[1].Desc != "C" {
 		t.Errorf("Unexpected result: %+v", updated)
 	}
 

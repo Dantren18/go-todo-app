@@ -49,11 +49,11 @@ func UpdateHandler(w http.ResponseWriter, r *http.Request) {
 	// desc/status are optional updates
 	var req struct {
 		Index  int    `json:"index"`
-		Desc   string `json:"desc"`
-		Status string `json:"status"`
+		Desc   string `json:"Desc"`
+		Status string `json:"Status"`
 	}
 
-	// read and decode the json request body into req, return error if necessary
+	// read and decode the json request body into req, return error if necessary. Use a pointer for decode as it expects a pointer to be able to decode.
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return

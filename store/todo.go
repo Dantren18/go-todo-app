@@ -8,8 +8,8 @@ import (
 
 // TodoItem defines a to‑do task with description and status
 type TodoItem struct {
-	Description string `json:"description"`
-	Status      string `json:"status"`
+	Desc   string `json:"Desc"`
+	Status string `json:"Status"`
 }
 
 // LoadTasks loads to‑do items from a JSON file
@@ -43,7 +43,7 @@ func UpdateTaskDescription(items []TodoItem, index int, newDesc string) ([]TodoI
 	if index < 0 || index >= len(items) {
 		return items, errors.New("update index out of range")
 	}
-	items[index].Description = newDesc
+	items[index].Desc = newDesc
 	return items, nil
 }
 
